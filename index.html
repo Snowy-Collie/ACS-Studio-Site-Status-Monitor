@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ACS Studio Site Status Monitor</title>
+    <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+    <div class="header">
+        <img src="logo.png" alt="ACS Studio Logo" class="logo">
+        <div class="copyright">
+            © ACS Studio 2024
+        </div>
+    </div>
+    <h1>ACS Studio Site Status Monitor</h1>
+
+    <!-- 用于显示各站点状态的容器 -->
+    <div id="site-container">
+        <div class="site-status" id="acsstudio-site">
+            <h2>acsstudio.site</h2>
+            <div id="current-status-site">Loading...</div>
+            <br>
+            <div class="status" id="status-container-site"></div>
+        </div>
+
+        <div class="site-status" id="status-acsstudio-site">
+            <h2>status.acsstudio.site</h2>
+            <div id="current-status-status">Loading...</div>
+            <br>
+            <div class="status" id="status-container-status"></div>
+        </div>
+
+        <div class="site-status" id="survey-acsstudio-site">
+            <h2>survey.acsstudio.site</h2>
+            <div id="current-status-survey">Loading...</div>
+            <br>
+            <div class="status" id="status-container-survey"></div>
+        </div>
+    </div>
+
+    <script>
+        // 显示状态的颜色映射
+        const statusColors = {
+            1: 'normal',   // 正常
+            2: 'abnormal', // 不正常
+            3: 'recovered' // 已恢复
+        };
+
+        // 加载状态数据并渲染
+        async function fetchStatusData(filePath, currentStatusId, statusContainerId) {
+            try {
+                const response = await fetch(filePath);
+                if (!response.ok) {
+                    throw new Error(`无法加载状态数据: ${response.statusText}`);
+                }
+                const data = await response.json();
+
+                // 更新当前状态
+                const currentStatus = data.current;
+                const currentStatusElement = document.getElementById(currentStatusId);
+                currentStatusElement.textContent = `Current Status: ${currentStatus === 1 ? 'Normal' : currentStatus === 2 ? 'Abnormal' : 'Recovered'}`;
+                currentStatusElement.className = `day ${statusColors[currentStatus]}`;
+
+                // 渲染历史状态
+                const statusContainer = document.getElementById(statusContainerId);
+                statusContainer.innerHTML = '';
+                data.days.forEach(status => {
+                    const dayElement = document.createElement('div');
+                    dayElement.className = `day ${statusColors[status]}`;
+                    dayElement.textContent = "";
+                    statusContainer.appendChild(dayElement);
+                });
+            } catch (error) {
+                console.error("加载数据时发生错误:", error);
+                document.getElementById(currentStatusId).textContent = "无法加载数据";
+            }
+        }
+
+        // 加载三个站点的状态
+        fetchStatusData('./status_data_site.json', 'current-status-site', 'status-container-site');
+        fetchStatusData('./status_data_status.json', 'current-status-status', 'status-container-status');
+        fetchStatusData('./status_data_survey.json', 'current-status-survey', 'status-container-survey');
+    </script>
+</body>
+</html>
