@@ -40,7 +40,7 @@ def update_status_file(file_path,link):
     current_status = detect_status(link)
 
     # 根据当前状态和历史状态判断是否为"已恢复"
-    if status_data["current"] == 2 and current_status == 1:
+    if (status_data["current"] == 2 or status_data["current"] == 3) and current_status == 1:
         current_status = 3
 
     # 更新当前状态和最后更新时间
